@@ -1,0 +1,12 @@
+namespace: csm
+name: shared_roles
+version: 1.0.0
+readme: README.md
+authors:
+- Romain Gautier <romain.gautier@sib.fr>
+description: Set of public roles used by the CSM team.
+license:
+- MIT
+repository: https://github.com/SIB-rennes/ansible__csm_shared_roles
+
+tags: [docker]

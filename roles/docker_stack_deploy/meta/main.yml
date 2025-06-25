@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Romain GAUTIER
+  role_name: docker_stack_deploy
+  description: Prepare a stack folder and deploy it
+  company: Numih France
+  license: MIT
+  min_ansible_version: "2.11"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - docker
+dependencies: []

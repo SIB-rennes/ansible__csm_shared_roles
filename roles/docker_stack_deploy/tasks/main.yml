@@ -1,0 +1,62 @@
+---
+- name: Make a unique sha1
+  set_fact:
+    unique_id: "{{ ansible_date_time.epoch | hash('sha1') }}"
+
+- name: List files
+  find:
+    paths: "{{stack_src_folder}}"
+    file_type: file
+    recurse: yes
+  register: files
+
+- name: List folders
+  find:
+    paths: "{{stack_src_folder}}"
+    file_type: directory
+    recurse: yes
+  register: folders
+
+- name: Make file paths relative
+  command: "realpath --relative-to={{stack_src_folder}} {{item.path}}"
+  register: files_rel_path_cmd
+  loop: "{{files.files}}"
+- name: Make file paths relative
+  set_fact:
+    relative_files: "{{files_rel_path_cmd.results | map(attribute='stdout') | list}}"
+
+- name: Make folder paths relative
+  command: "realpath --relative-to={{stack_src_folder}} {{item.path}}"
+  register: relative_folder_path_cmd
+  loop: "{{folders.files}}"
+- name: Make folder paths relative
+  set_fact:
+    dossiers_relatifs: "{{relative_folder_path_cmd.results | map(attribute='stdout') | list}}"
+
+- name: Make target filesystem tree
+  file:
+    path: "{{stack_tmp_dest_folder}}/{{item}}"
+    state: directory
+  loop: "{{dossiers_relatifs + [ '' ]}}"
+
+- name: "Templatize docker stack {{stack_name}}"
+  template:
+    src: "{{stack_src_folder}}/{{item}}"
+    dest: "{{stack_tmp_dest_folder}}/{{item}}"
+  loop: "{{relative_files}}"
+  
+#
+###
+- name: "Deploy {{stack_name}}"  
+  docker_stack:
+    state: present
+    name: "{{stack_name}}"
+    docker_host: "{{docker_host}}"
+    compose:
+      - "{{stack_tmp_dest_folder}}/docker-compose.yml"
+      - "{{stack_tmp_dest_folder}}/docker-compose.override.yml"
+
+- name: Supprimer les fichiers stack locaux
+  file:
+    path: "{{stack_tmp_dest_folder}}"
+    state: absent
