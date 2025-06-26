@@ -3,6 +3,7 @@
   set_fact:
     unique_id: "{{ ansible_date_time.epoch | hash('sha1') }}"
 
+######
 - name: List files
   find:
     paths: "{{stack_src_folder}}"
@@ -16,6 +17,7 @@
     file_type: directory
     recurse: yes
   register: folders
+######
 
 - name: Make file paths relative
   command: "realpath --relative-to={{stack_src_folder}} {{item.path}}"
@@ -39,22 +41,63 @@
     state: directory
   loop: "{{dossiers_relatifs + [ '' ]}}"
 
+#############
+#
+
 - name: "Templatize docker stack {{stack_name}}"
   template:
     src: "{{stack_src_folder}}/{{item}}"
     dest: "{{stack_tmp_dest_folder}}/{{item}}"
   loop: "{{relative_files}}"
+  when: "item not in exclude_from_templating"
+
+- name: "Copy docker stack {{stack_name}}"
+  copy:
+    src: "{{stack_src_folder}}/{{item}}"
+    dest: "{{stack_tmp_dest_folder}}/{{item}}"
+  loop: "{{relative_files}}"
+  when: "item in exclude_from_templating"
+
+############
+#
   
 #
-###
+############### Sane check on docker compose files
+
+- name: "Check if docker compose files exists"
+  vars:
+    prefix: "{{stack_tmp_dest_folder}}/"
+    _docker_compose_files: "{{ docker_compose_files | map('regex_replace', '^', prefix) | list  }}"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ _docker_compose_files }}"
+  register: docker_compose_files_statuses
+
+- name: "Retain only existing docker compose files"
+  set_fact:
+    existing_docker_compose_files: >-
+      {{ docker_compose_files_statuses.results
+         | selectattr('stat.exists', 'defined')
+         | selectattr('stat.exists')
+         | map(attribute='stat.path')
+         | list }}
+
+- name: "Fail if no compose files available"
+  ansible.builtin.fail:
+    msg: "No existing docker-compose files. Aborting."
+  when: existing_docker_compose_files | length == 0
+
+############## Deploy command
+- name: Debug - docker-compose files
+  debug:
+    var: existing_docker_compose_files
+
 - name: "Deploy {{stack_name}}"  
   docker_stack:
     state: present
     name: "{{stack_name}}"
     docker_host: "{{docker_host}}"
-    compose:
-      - "{{stack_tmp_dest_folder}}/docker-compose.yml"
-      - "{{stack_tmp_dest_folder}}/docker-compose.override.yml"
+    compose: "{{existing_docker_compose_files}}"
 
 - name: Supprimer les fichiers stack locaux
   file:

@@ -3,3 +3,7 @@ stack_name: "foo"
 stack_src_folder: "foo"
 stack_tmp_dest_folder: "/tmp/foo"
 docker_host: "unix:///var/run/docker.sock"
+docker_compose_files:
+  - docker-compose.yml
+  - docker-compose.override.yml
+exclude_from_templating: []
