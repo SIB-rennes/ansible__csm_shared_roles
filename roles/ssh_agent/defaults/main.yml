@@ -1,0 +1,4 @@
+---
+priv_ssh_key_path: ""
+state: "present"
+existing_agent: {}

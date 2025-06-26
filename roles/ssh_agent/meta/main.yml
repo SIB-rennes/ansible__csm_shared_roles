@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Romain GAUTIER
+  role_name: ssh_agent
+  description: Utility to store key in agent and reuse it
+  company: Numih France
+  license: MIT
+  min_ansible_version: "2.11"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - docker
+dependencies: []

@@ -17,7 +17,7 @@ Variables :
 
 ## Example
 
-```ansible
+```yaml
 - name: Deploy a test
   hosts: localhost # Most logic since we want a client to deploy on distant docker swarm
   roles:

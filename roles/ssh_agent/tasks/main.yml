@@ -1,0 +1,39 @@
+---
+- name: "Fail if no priv_ssh_key_path"
+  ansible.builtin.fail:
+    msg: "No private key specified. Abort."
+  when: state == 'present' and ( priv_ssh_key_path | default('') ) == ''
+
+- name: "Fail if state is illegal"
+  ansible.builtin.fail:
+    msg: "state is invalid. Abort."
+  when: state != 'present' and state != 'absent'
+
+##########
+- name: Setup ssh-agent
+  shell: |
+    eval "$(ssh-agent -s)" > /dev/null
+    ssh-add {{priv_ssh_key_path}} > /dev/null
+    echo $SSH_AUTH_SOCK
+    echo $SSH_AGENT_PID
+  register: ssh_agent_output
+  args:
+    executable: /bin/bash
+  when: state == 'present'
+
+- name: Set agent env var
+  set_fact:
+    ssh_agent_env: {
+      SSH_AUTH_SOCK: "{{ ssh_agent_output.stdout_lines[0] }}",
+      SSH_AGENT_PID: "{{ ssh_agent_output.stdout_lines[1] }}",
+    }
+  when: state == 'present'
+
+
+- name: Kill ssh-agent
+  environment: "{{existing_agent}}"
+  shell: |
+    eval "$(ssh-agent -k)"
+  args:
+    executable: /bin/bash
+  when: state == 'absent' and (existing_agent | default('')) != ''
