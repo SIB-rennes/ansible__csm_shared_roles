@@ -12,6 +12,7 @@ Variables :
 | `stack_src_folder`        | Source folder containing the stack                                          | string | `foo`                                                 |
 | `docker_compose_files`    | List of compose files to deploy                                             | list   | [`docker-compose.yml`, `docker-compose.override.yml`] |
 | `stack_tmp_dest_folder`   | Target folder containing temporary files for the stack                      | string | `/tmp/foo`                                            |
+| `copy_stack_files_to`     | Target folder to keep files for the stack                                   | string | ``                                                    |
 | `docker_host`             | Docker host to use on deployment                                            | list   | `unix:///var/run/docker.sock`                         |
 | `exclude_from_templating` | List of path to exclude from jinja templating (file will be copied instead) | list   | `[]`                                                  |
 
@@ -26,8 +27,9 @@ Variables :
       stack_name: test
       stack_src_folder: templates/test
       stack_tmp_dest_folder: "./.tmp/test"
+      copy_stack_files_to: "/tmp/my-deploy"
       exclude_from_templating:
-        - config/file1.txt  # This file will be copied as is - not templatized
+        - config/file1.txt # This file will be copied as is - not templatized
       docker_compose_files:
         - docker-compose.yml
         - docker-compose.plus.yml

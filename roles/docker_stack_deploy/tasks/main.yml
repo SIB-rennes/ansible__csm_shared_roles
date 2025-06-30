@@ -3,7 +3,7 @@
   set_fact:
     unique_id: "{{ ansible_date_time.epoch | hash('sha1') }}"
 
-######
+###### List fs tree of src
 - name: List files
   find:
     paths: "{{stack_src_folder}}"
@@ -17,8 +17,8 @@
     file_type: directory
     recurse: yes
   register: folders
-######
-
+  
+###### Construction of correct paths
 - name: Make file paths relative
   command: "realpath --relative-to={{stack_src_folder}} {{item.path}}"
   register: files_rel_path_cmd
@@ -33,16 +33,32 @@
   loop: "{{folders.files}}"
 - name: Make folder paths relative
   set_fact:
-    dossiers_relatifs: "{{relative_folder_path_cmd.results | map(attribute='stdout') | list}}"
+    relative_folders: "{{relative_folder_path_cmd.results | map(attribute='stdout') | list}}"
+
+########### Handle tmp stack dest folder
+- name: contents of tmp stack dest folder
+  find:
+    paths: "{{stack_tmp_dest_folder}}"
+    file_type: any
+  register: stack_tmp_dest_folder_content
+
+- name: "Fail if tmp stack dest folder is not empty"
+  ansible.builtin.fail:
+    msg: "{{stack_tmp_dest_folder}} is not empty. Aborting."
+  when: stack_tmp_dest_folder_content.matched > 0
+
+- name: Cleanup tmp stack dest folder
+  file:
+    path: "{{stack_tmp_dest_folder}}"
+    state: absent
 
 - name: Make target filesystem tree
   file:
     path: "{{stack_tmp_dest_folder}}/{{item}}"
     state: directory
-  loop: "{{dossiers_relatifs + [ '' ]}}"
+  loop: "{{relative_folders + [ '' ]}}"
 
-#############
-#
+############# Templatize and copy stack
 
 - name: "Templatize docker stack {{stack_name}}"
   template:
@@ -58,11 +74,8 @@
   loop: "{{relative_files}}"
   when: "item in exclude_from_templating"
 
-############
-#
-  
-#
-############### Sane check on docker compose files
+############### Deploy command
+####### Sane check on docker compose files
 
 - name: "Check if docker compose files exists"
   vars:
@@ -87,7 +100,6 @@
     msg: "No existing docker-compose files. Aborting."
   when: existing_docker_compose_files | length == 0
 
-############## Deploy command
 - name: Debug - docker-compose files
   debug:
     var: existing_docker_compose_files
@@ -99,7 +111,17 @@
     docker_host: "{{docker_host}}"
     compose: "{{existing_docker_compose_files}}"
 
-- name: Supprimer les fichiers stack locaux
+############# Copy resolved stacks
+###
+- name: "Copy stack folder"
+  copy:
+    src: "{{stack_tmp_dest_folder}}"
+    dest: "{{copy_stack_files_to}}"
+  when: copy_stack_files_to != ''
+
+############# Cleanups
+
+- name: Cleanup tmp stack dest folder
   file:
     path: "{{stack_tmp_dest_folder}}"
     state: absent
