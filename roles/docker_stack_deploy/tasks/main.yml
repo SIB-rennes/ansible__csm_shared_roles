@@ -109,6 +109,7 @@
     state: present
     name: "{{stack_name}}"
     docker_host: "{{docker_host}}"
+    with_registry_auth: true
     compose: "{{existing_docker_compose_files}}"
 
 ############# Copy resolved stacks
