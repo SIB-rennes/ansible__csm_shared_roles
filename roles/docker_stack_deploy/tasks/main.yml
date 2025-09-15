@@ -111,6 +111,7 @@
     docker_host: "{{docker_host}}"
     with_registry_auth: true
     compose: "{{existing_docker_compose_files}}"
+    detach: "{{detach}}"
 
 ############# Copy resolved stacks
 ###

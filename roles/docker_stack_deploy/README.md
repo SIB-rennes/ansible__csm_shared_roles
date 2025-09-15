@@ -6,15 +6,16 @@ This role allow to prepare a folder containing a docker stack and call `docker d
 
 Variables :
 
-| Variable name             | Description                                                                 | Type   | Default value                                         |
-| ------------------------- | --------------------------------------------------------------------------- | ------ | ----------------------------------------------------- |
-| `stack_name`              | Name of the docker stack                                                    | int    | `foo`                                                 |
-| `stack_src_folder`        | Source folder containing the stack                                          | string | `foo`                                                 |
-| `docker_compose_files`    | List of compose files to deploy                                             | list   | [`docker-compose.yml`, `docker-compose.override.yml`] |
-| `stack_tmp_dest_folder`   | Target folder containing temporary files for the stack                      | string | `/tmp/foo`                                            |
-| `copy_stack_files_to`     | Target folder to keep files for the stack                                   | string | ``                                                    |
-| `docker_host`             | Docker host to use on deployment                                            | list   | `unix:///var/run/docker.sock`                         |
-| `exclude_from_templating` | List of path to exclude from jinja templating (file will be copied instead) | list   | `[]`                                                  |
+| Variable name             | Description                                                                 | Type    | Default value                                         |
+| ------------------------- | --------------------------------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `stack_name`              | Name of the docker stack                                                    | string  | `foo`                                                 |
+| `stack_src_folder`        | Source folder containing the stack                                          | string  | `foo`                                                 |
+| `docker_compose_files`    | List of compose files to deploy                                             | list    | [`docker-compose.yml`, `docker-compose.override.yml`] |
+| `stack_tmp_dest_folder`   | Target folder containing temporary files for the stack                      | string  | `/tmp/foo`                                            |
+| `copy_stack_files_to`     | Target folder to keep files for the stack                                   | string  | ``                                                    |
+| `docker_host`             | Docker host to use on deployment                                            | string  | `unix:///var/run/docker.sock`                         |
+| `exclude_from_templating` | List of path to exclude from jinja templating (file will be copied instead) | list    | `[]`                                                  |
+| `detach`                  | Run stack deployment in detached mode                                       | boolean | `true`                                                |
 
 ## Example
 
