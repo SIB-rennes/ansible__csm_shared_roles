@@ -4,12 +4,15 @@
     unique_id: "{{ ansible_date_time.epoch | hash('sha1') }}"
 
 ###### List fs tree of src
+# Source files always live on the controller (template/copy src is controller-side),
+# so delegate find and realpath to localhost regardless of the target host.
 - name: List files
   find:
     paths: "{{stack_src_folder}}"
     file_type: file
     recurse: yes
   register: files
+  delegate_to: localhost
 
 - name: List folders
   find:
@@ -17,12 +20,14 @@
     file_type: directory
     recurse: yes
   register: folders
-  
+  delegate_to: localhost
+
 ###### Construction of correct paths
 - name: Make file paths relative
   command: "realpath --relative-to={{stack_src_folder}} {{item.path}}"
   register: files_rel_path_cmd
   loop: "{{files.files}}"
+  delegate_to: localhost
 - name: Make file paths relative
   set_fact:
     relative_files: "{{files_rel_path_cmd.results | map(attribute='stdout') | list}}"
@@ -31,6 +36,7 @@
   command: "realpath --relative-to={{stack_src_folder}} {{item.path}}"
   register: relative_folder_path_cmd
   loop: "{{folders.files}}"
+  delegate_to: localhost
 - name: Make folder paths relative
   set_fact:
     relative_folders: "{{relative_folder_path_cmd.results | map(attribute='stdout') | list}}"
@@ -119,6 +125,7 @@
   copy:
     src: "{{stack_tmp_dest_folder}}"
     dest: "{{copy_stack_files_to}}"
+    remote_src: true
   when: copy_stack_files_to != ''
 
 ############# Cleanups
