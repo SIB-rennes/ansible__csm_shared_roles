@@ -10,6 +10,7 @@
     file_type: file
     recurse: yes
   register: files
+  delegate_to: localhost
 
 - name: List folders
   find:
@@ -17,6 +18,7 @@
     file_type: directory
     recurse: yes
   register: folders
+  delegate_to: localhost
   
 ###### Construction of correct paths
 - name: Make file paths relative
@@ -41,6 +43,7 @@
     paths: "{{stack_tmp_dest_folder}}"
     file_type: any
   register: stack_tmp_dest_folder_content
+  delegate_to: localhost
 
 - name: "Fail if tmp stack dest folder is not empty"
   ansible.builtin.fail:
