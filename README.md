@@ -5,7 +5,7 @@
 ## How to import as a collection
 
 ```yaml
- - name: https://github.com/SIB-rennes/ansible__csm_shared_roles.git
+ - name: https://github.com/numihfrance-rennes/ansible__csm_shared_roles.git
    type: git
    version: <TAG_NUMBER>
 ```

@@ -7,6 +7,6 @@ authors:
 description: Set of public roles used by the CSM team.
 license:
 - MIT
-repository: https://github.com/SIB-rennes/ansible__csm_shared_roles
+repository: https://github.com/numihfrance-rennes/ansible__csm_shared_roles
 
 tags: [docker]
